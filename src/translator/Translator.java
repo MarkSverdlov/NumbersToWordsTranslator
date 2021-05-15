@@ -3,7 +3,7 @@ package translator;
 public class Translator {
 	private static final int DECIMAL = 10;
 
-	private enum Digit {
+	private enum Unit {
 		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero;
 
 		int toNumber() {
@@ -34,30 +34,30 @@ public class Translator {
 			}
 		}
 
-		static Digit toDigit(int digit) {
-			switch (digit) {
+		static Unit toUnit(int unit) {
+			switch (unit) {
 			case 1:
-				return Digit.One;
+				return Unit.One;
 			case 2:
-				return Digit.Two;
+				return Unit.Two;
 			case 3:
-				return Digit.Three;
+				return Unit.Three;
 			case 4:
-				return Digit.Four;
+				return Unit.Four;
 			case 5:
-				return Digit.Five;
+				return Unit.Five;
 			case 6:
-				return Digit.Six;
+				return Unit.Six;
 			case 7:
-				return Digit.Seven;
+				return Unit.Seven;
 			case 8:
-				return Digit.Eight;
+				return Unit.Eight;
 			case 9:
-				return Digit.Nine;
+				return Unit.Nine;
 			case 0:
-				return Digit.Zero;
+				return Unit.Zero;
 			default:
-				throw new IllegalArgumentException("Number: " + digit + " is not a digit.");
+				throw new IllegalArgumentException("Number: " + unit + " is not a digit.");
 			}
 		}
 	}
@@ -70,11 +70,11 @@ public class Translator {
 	 * @param n      - the index of the digit
 	 * @return the nth digit of the number
 	 */
-	private static Digit returnNthDigit(int number, int n) {
+	private static int returnNthDigit(int number, int n) {
 		for (int i = 0; i < n; i++) {
 			number /= DECIMAL;
 		}
 
-		return Digit.toDigit(n % DECIMAL);
+		return n % DECIMAL;
 	}
 }
