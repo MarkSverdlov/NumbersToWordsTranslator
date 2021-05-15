@@ -62,6 +62,37 @@ public class Translator {
 		}
 	}
 
+	private enum Tens {
+		Ten, Twenty, Thirty, Fourty, Fifty, Sixty, Seventy, Eighty, Ninety, Zero;
+
+		static Tens toTens(int tens) {
+			switch (tens) {
+			case 1:
+				return Tens.Ten;
+			case 2:
+				return Tens.Twenty;
+			case 3:
+				return Tens.Thirty;
+			case 4:
+				return Tens.Fourty;
+			case 5:
+				return Tens.Fifty;
+			case 6:
+				return Tens.Sixty;
+			case 7:
+				return Tens.Seventy;
+			case 8:
+				return Tens.Eighty;
+			case 9:
+				return Tens.Ninety;
+			case 0:
+				return Tens.Zero;
+			default:
+				throw new IllegalArgumentException("Number: " + tens + " is not a digit.");
+			}
+		}
+	}
+
 	/**
 	 * the method returns the nth digit of the given number, from the rightmost
 	 * digit being digit 0, and growing to the left.
@@ -76,5 +107,34 @@ public class Translator {
 		}
 
 		return n % DECIMAL;
+	}
+	
+	private static String getUnits(int number) {
+		Unit unit = Unit.toUnit(returnNthDigit(number, 0));
+		if (unit == Unit.Zero)
+			return "";
+		return unit.toString();
+	}
+
+	private static String getTens(int number) {
+		Tens tens = Tens.toTens(returnNthDigit(number, 1));
+		if (tens == Tens.Zero)
+			return "";
+		return tens.toString();
+	}
+
+	private static String getHundreds(int number) {
+		Unit hundreds = Unit.toUnit(returnNthDigit(number, 2));
+		if (hundreds == Unit.Zero)
+			return "";
+		if (hundreds == Unit.One)
+			return hundreds.toString() + " hundred";
+		else
+			return hundreds.toString() + " hundreds";
+	}
+	
+	private static String translateOrderOfMagnitude (int number) {
+
+		return getHundreds(number) + getTens(number) + getUnits(number);
 	}
 }
