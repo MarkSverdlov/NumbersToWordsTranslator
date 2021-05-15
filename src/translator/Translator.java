@@ -143,7 +143,7 @@ public class Translator {
 			number /= DECIMAL;
 		}
 
-		return n % DECIMAL;
+		return (int) number % DECIMAL;
 	}
 
 	private static String getUnits(long number) {
@@ -170,9 +170,16 @@ public class Translator {
 			return hundreds.toString() + " hundreds";
 	}
 
-	private static String translateOrderOfMagnitude(long number) {
-
-		return getHundreds(number) + getTens(number) + getUnits(number);
+	private static StringBuilder translateOrderOfMagnitude(long number) {
+		StringBuilder translation = new StringBuilder();
+		translation.append(getHundreds(number));
+		if (!getTens(number).isEmpty() && !translation.isEmpty())
+			translation.append(" ");
+		translation.append(getTens(number));
+		if (!getUnits(number).isEmpty() && !translation.isEmpty())
+			translation.append(" ");
+		translation.append(getUnits(number));
+		return translation;
 	}
 
 	public static String translate(long number) {
