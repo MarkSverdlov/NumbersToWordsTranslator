@@ -3,6 +3,8 @@ package translator;
 public class Translator {
 	private static final int DECIMAL = 10;
 
+	private static final long HIGHEST_NUMBER_TRANSLATABLE = (long) 10e15 - 1;
+
 	private enum Unit {
 		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero;
 
@@ -60,6 +62,11 @@ public class Translator {
 				throw new IllegalArgumentException("Number: " + unit + " is not a digit.");
 			}
 		}
+
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase();
+		}
 	}
 
 	private enum Tens {
@@ -91,6 +98,36 @@ public class Translator {
 				throw new IllegalArgumentException("Number: " + tens + " is not a digit.");
 			}
 		}
+
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase();
+		}
+	}
+
+	private enum OrderOfMagnitude {
+		Thousands, Millions, Billions, Trilions;
+
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase();
+		}
+
+		public String toStringSingular() {
+			switch (this) {
+			case Billions:
+				return "billion";
+			case Millions:
+				return "million";
+			case Thousands:
+				return "thousand";
+			case Trilions:
+				return "trillion";
+			default:
+				return null;
+
+			}
+		}
 	}
 
 	/**
@@ -101,29 +138,29 @@ public class Translator {
 	 * @param n      - the index of the digit
 	 * @return the nth digit of the number
 	 */
-	private static int returnNthDigit(int number, int n) {
+	private static int returnNthDigit(long number, int n) {
 		for (int i = 0; i < n; i++) {
 			number /= DECIMAL;
 		}
 
 		return n % DECIMAL;
 	}
-	
-	private static String getUnits(int number) {
+
+	private static String getUnits(long number) {
 		Unit unit = Unit.toUnit(returnNthDigit(number, 0));
 		if (unit == Unit.Zero)
 			return "";
 		return unit.toString();
 	}
 
-	private static String getTens(int number) {
+	private static String getTens(long number) {
 		Tens tens = Tens.toTens(returnNthDigit(number, 1));
 		if (tens == Tens.Zero)
 			return "";
 		return tens.toString();
 	}
 
-	private static String getHundreds(int number) {
+	private static String getHundreds(long number) {
 		Unit hundreds = Unit.toUnit(returnNthDigit(number, 2));
 		if (hundreds == Unit.Zero)
 			return "";
@@ -132,9 +169,67 @@ public class Translator {
 		else
 			return hundreds.toString() + " hundreds";
 	}
-	
-	private static String translateOrderOfMagnitude (int number) {
+
+	private static String translateOrderOfMagnitude(long number) {
 
 		return getHundreds(number) + getTens(number) + getUnits(number);
+	}
+
+	public static String translate(long number) {
+		if (number > HIGHEST_NUMBER_TRANSLATABLE)
+			return null; // translation failed
+		if (number == 0)
+			return "zero";
+		StringBuilder translation = new StringBuilder("");
+		long trillions = number / (long) 10e12;
+		if (trillions != 0) {
+			translation.append(translateOrderOfMagnitude(trillions));
+			if (trillions != 1)
+				translation.append("trillions");
+			else
+				translation.append("trillions");
+		}
+		
+		long billions = number / (long) 10e9;
+		if (billions != 0) {
+			if (trillions != 0)
+				translation.append(", ");
+			translation.append(translateOrderOfMagnitude(billions));
+			if (billions != 1)
+				translation.append("billions");
+			else
+				translation.append("billion");
+		}
+		
+		long millions = number / (long) 10e6;
+		if (millions != 0) {
+			if (billions != 0)
+				translation.append(", ");
+			translation.append(translateOrderOfMagnitude(millions));
+			if (millions != 1)
+				translation.append("millions");
+			else
+				translation.append("million");
+		}
+		
+		long thousands = number / (long) 10e3;
+		if (thousands != 0) {
+			if (millions != 0)
+				translation.append(", ");
+			translation.append(translateOrderOfMagnitude(thousands));
+			if (thousands != 1)
+				translation.append("thousands");
+			else
+				translation.append("thousand");
+		}
+		
+		long units = number;
+		if (units != 0) {
+			if (thousands != 0)
+				translation.append(", ");
+			translation.append(translateOrderOfMagnitude(units));
+		}
+		
+		return translation.toString();
 	}
 }
