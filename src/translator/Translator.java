@@ -233,7 +233,7 @@ public class Translator {
 			return "zero";
 		StringBuilder translation = new StringBuilder("");
 		long trillions = number / (long) 1e12;
-		if (trillions != 0) {
+		if (trillions % 1e3 != 0) {
 			translation.append(translateOrderOfMagnitude(trillions));
 			if (trillions != 1)
 				translation.append(" trillions");
@@ -242,7 +242,7 @@ public class Translator {
 		}
 		
 		long billions = number / (long) 1e9;
-		if (billions != 0) {
+		if (billions % 1e3 != 0) {
 			if (trillions != 0)
 				translation.append(", ");
 			translation.append(translateOrderOfMagnitude(billions));
@@ -253,7 +253,7 @@ public class Translator {
 		}
 		
 		long millions = number / (long) 1e6;
-		if (millions != 0) {
+		if (millions % 1e3 != 0) {
 			if (billions != 0)
 				translation.append(", ");
 			translation.append(translateOrderOfMagnitude(millions));
@@ -264,7 +264,7 @@ public class Translator {
 		}
 		
 		long thousands = number / (long) 1e3;
-		if (thousands != 0) {
+		if (thousands % 1e3 != 0) {
 			if (millions != 0)
 				translation.append(", ");
 			translation.append(translateOrderOfMagnitude(thousands));
@@ -275,7 +275,7 @@ public class Translator {
 		}
 		
 		long units = number;
-		if (units != 0) {
+		if (units % 1e3 != 0) {
 			if (thousands != 0)
 				translation.append(", ");
 			translation.append(translateOrderOfMagnitude(units));
