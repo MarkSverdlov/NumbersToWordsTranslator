@@ -3,7 +3,7 @@ package translator;
 public class Translator {
 	private static final int DECIMAL = 10;
 
-	private static final long HIGHEST_NUMBER_TRANSLATABLE = (long) 10e15 - 1;
+	private static final long HIGHEST_NUMBER_TRANSLATABLE = (long) 1e15 - 1;
 
 	private enum Unit {
 		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero;
@@ -143,7 +143,7 @@ public class Translator {
 			number /= DECIMAL;
 		}
 
-		return (int) number % DECIMAL;
+		return (int) (number % DECIMAL);
 	}
 
 	private static String getUnits(long number) {
@@ -188,46 +188,46 @@ public class Translator {
 		if (number == 0)
 			return "zero";
 		StringBuilder translation = new StringBuilder("");
-		long trillions = number / (long) 10e12;
+		long trillions = number / (long) 1e12;
 		if (trillions != 0) {
 			translation.append(translateOrderOfMagnitude(trillions));
 			if (trillions != 1)
-				translation.append("trillions");
+				translation.append(" trillions");
 			else
-				translation.append("trillions");
+				translation.append(" trillions");
 		}
 		
-		long billions = number / (long) 10e9;
+		long billions = number / (long) 1e9;
 		if (billions != 0) {
 			if (trillions != 0)
 				translation.append(", ");
 			translation.append(translateOrderOfMagnitude(billions));
 			if (billions != 1)
-				translation.append("billions");
+				translation.append(" billions");
 			else
-				translation.append("billion");
+				translation.append(" billion");
 		}
 		
-		long millions = number / (long) 10e6;
+		long millions = number / (long) 1e6;
 		if (millions != 0) {
 			if (billions != 0)
 				translation.append(", ");
 			translation.append(translateOrderOfMagnitude(millions));
 			if (millions != 1)
-				translation.append("millions");
+				translation.append(" millions");
 			else
-				translation.append("million");
+				translation.append(" million");
 		}
 		
-		long thousands = number / (long) 10e3;
+		long thousands = number / (long) 1e3;
 		if (thousands != 0) {
 			if (millions != 0)
 				translation.append(", ");
 			translation.append(translateOrderOfMagnitude(thousands));
 			if (thousands != 1)
-				translation.append("thousands");
+				translation.append(" thousands");
 			else
-				translation.append("thousand");
+				translation.append(" thousand");
 		}
 		
 		long units = number;

@@ -69,7 +69,9 @@ enum Unit {
 
 public class Test {
 	public static void main(String[] args) {
-		System.out.println(Translator.translate((new Scanner(System.in)).nextLong()));
-		
+	String translation = Translator.translate((new Scanner(System.in)).nextLong());
+	 System.out.println(translation != null ? translation : "The number is too big.");
+	//	System.out.println(3516513213L
+// % 10);
 	}
 }
