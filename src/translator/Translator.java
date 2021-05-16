@@ -129,6 +129,44 @@ public class Translator {
 			}
 		}
 	}
+	
+	private enum Teens {
+		Eleven, Twelve, Thirteen, Fourteen, Fifteen, Sixteen, Seventeen, Eighteen, Nineteen;
+		
+		static Teens toTeens(int teen) {
+			switch (teen) {
+			case 11:
+				return Teens.Eleven;
+			case 12:
+				return Teens.Twelve;
+			case 13:
+				return Teens.Thirteen;
+			case 14:
+				return Teens.Fourteen;
+			case 15:
+				return Teens.Fifteen;
+			case 16:
+				return Teens.Sixteen;
+			case 17:
+				return Teens.Seventeen;
+			case 18:
+				return Teens.Eighteen;
+			case 19:
+				return Teens.Nineteen;
+			default:
+				throw new IllegalArgumentException("Number: " + teen + " is not a teen.");
+			}
+		}
+		
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase();
+		}
+		
+		static boolean isTeen(long number) {
+			return number <= 19 && number >= 11;
+		}
+	}
 
 	/**
 	 * the method returns the nth digit of the given number, from the rightmost
@@ -173,6 +211,12 @@ public class Translator {
 	private static StringBuilder translateOrderOfMagnitude(long number) {
 		StringBuilder translation = new StringBuilder();
 		translation.append(getHundreds(number));
+		if (Teens.isTeen(number % 100)) {
+			if (!translation.isEmpty())
+				translation.append(" ");
+			translation.append(Teens.toTeens((int) (number % 100)));
+			return translation; // the teen segment in the logic override the tens & units segments.
+		}
 		if (!getTens(number).isEmpty() && !translation.isEmpty())
 			translation.append(" ");
 		translation.append(getTens(number));
