@@ -19,10 +19,6 @@ import java.util.regex.Pattern;
 public class Translator {
 	private static final int DECIMAL = 10;
 
-	private static final long LOWEST_NUMBER_TRANSLATEABLE = 0L;
-
-	private static final long HIGHEST_NUMBER_TRANSLATABLE = (long) 1e15 - 1;
-
 	public static class TranslatorConstants {
 		public static class OrderOfMagnitude {
 			private String singularName;
@@ -265,52 +261,6 @@ public class Translator {
 		translation.append(getUnits(number));
 		return translation;
 	}
-
-	/**
-	 * This is the main and most important method in the class. It is implemented by
-	 * cutting {@code number} into chunks of three decimal digits, each being
-	 * translated individually into a {@code StringBuilder} of the form
-	 * {@code new StringBuilder(String.format("%d hundreds %d %d", hundreds, tens, units))}
-	 * or alternatively of the form
-	 * {@code new StringBuilder(String.format("%d hundreds %d", hundreds, teens))}
-	 * if appropriate. The individual translations are then sequentially appended
-	 * into {@code translation} with appropriates commas, spaces and words. Finally,
-	 * the method returns {@code translation.toString()}.
-	 * 
-	 * @param number to be translated
-	 * @return a string representing the number in English, or null if translation
-	 *         is unsuccessful.
-	 */
-	/*
-	 * public static String translate(String number) { if (number >
-	 * HIGHEST_NUMBER_TRANSLATABLE || number < LOWEST_NUMBER_TRANSLATEABLE) return
-	 * null; // translation failed if (number == 0) return "zero"; StringBuilder
-	 * translation = new StringBuilder(""); long trillions = number / (long) 1e12;
-	 * if (trillions % 1e3 != 0) {
-	 * translation.append(translateOrderOfMagnitude(trillions)); if (trillions != 1)
-	 * translation.append(" trillions"); else translation.append(" trillion"); }
-	 * 
-	 * long billions = number / (long) 1e9; if (billions % 1e3 != 0) { if (trillions
-	 * != 0) translation.append(", ");
-	 * translation.append(translateOrderOfMagnitude(billions)); if (billions != 1)
-	 * translation.append(" billions"); else translation.append(" billion"); }
-	 * 
-	 * long millions = number / (long) 1e6; if (millions % 1e3 != 0) { if (billions
-	 * != 0) translation.append(", ");
-	 * translation.append(translateOrderOfMagnitude(millions)); if (millions != 1)
-	 * translation.append(" millions"); else translation.append(" million"); }
-	 * 
-	 * long thousands = number / (long) 1e3; if (thousands % 1e3 != 0) { if
-	 * (millions != 0) translation.append(", ");
-	 * translation.append(translateOrderOfMagnitude(thousands)); if (thousands != 1)
-	 * translation.append(" thousands"); else translation.append(" thousand"); }
-	 * 
-	 * long units = number; if (units % 1e3 != 0) { if (thousands != 0)
-	 * translation.append(", ");
-	 * translation.append(translateOrderOfMagnitude(units)); }
-	 * 
-	 * return translation.toString(); }
-	 */
 
 	/**
 	 * Checks if the input is a number.
