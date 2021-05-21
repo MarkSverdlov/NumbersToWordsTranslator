@@ -1,22 +1,95 @@
 package translator;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 /**
- * The class implements a static method {@code translate()} which gets as a parameter 
- * of type {@code long} and if it's between {@code LOWEST_NUMBER_TRANSLATABLE} to {@code HIGHEST_NUMBER_TRANSLATABLE}
- * the method outputs a String which names the number in English.
+ * The class implements a static method {@code translate()} which gets as a
+ * parameter of type {@code long} and if it's between
+ * {@code LOWEST_NUMBER_TRANSLATABLE} to {@code HIGHEST_NUMBER_TRANSLATABLE} the
+ * method outputs a String which names the number in English.
  * 
- * The class also implement all the helper methods, enums and other auxiliary code that supports the {@code translate()}
- * method.
+ * The class also implement all the helper methods, enums and other auxiliary
+ * code that supports the {@code translate()} method.
  * 
  * @author Mark
  *
  */
 public class Translator {
 	private static final int DECIMAL = 10;
-	
+
 	private static final long LOWEST_NUMBER_TRANSLATEABLE = 0L;
 
 	private static final long HIGHEST_NUMBER_TRANSLATABLE = (long) 1e15 - 1;
+
+	public static class TranslatorConstants {
+		public static class OrderOfMagnitude {
+			private String singularName;
+			private String pluralName;
+
+			public OrderOfMagnitude(String singularName, String pluralName) {
+				this.singularName = singularName;
+				this.pluralName = pluralName;
+			}
+
+			public String getSingularName() {
+				return singularName;
+			}
+
+			public String getPluralName() {
+				return pluralName;
+			}
+
+		}
+
+		private List<OrderOfMagnitude> listOfConstants;
+
+		// default constructor
+		public TranslatorConstants() {
+			this.listOfConstants = new ArrayList<OrderOfMagnitude>();
+			this.listOfConstants.add(new OrderOfMagnitude("", ""));
+			this.listOfConstants.add(new OrderOfMagnitude(" thousand", " thousands"));
+			this.listOfConstants.add(new OrderOfMagnitude(" million", " millions"));
+			this.listOfConstants.add(new OrderOfMagnitude(" billion", " billions"));
+			this.listOfConstants.add(new OrderOfMagnitude(" trillion", " trillions"));
+		}
+
+		public TranslatorConstants(List<OrderOfMagnitude> list) {
+			if (list == null) // the list should never be null pointer.
+				list = new ArrayList<OrderOfMagnitude>();
+			this.listOfConstants = list;
+		}
+
+		/**
+		 * returns the maximum length of a raw number string (without +, - or commas)
+		 * that this translator know to translate.
+		 * 
+		 * @return maximum translatable length
+		 */
+		public int getUpperBound() {
+			try {
+				return 3 * getListOfConstants().size();
+			} catch (NullPointerException e) {
+				/* this doesn't happen */ return 0;
+			}
+		}
+
+		public List<OrderOfMagnitude> getListOfConstants() {
+			return listOfConstants;
+		}
+
+	}
+
+	private TranslatorConstants constants;
+
+	public Translator() {
+		constants = new TranslatorConstants();
+	}
+
+	public Translator(List<TranslatorConstants.OrderOfMagnitude> list) {
+		constants = new TranslatorConstants(list);
+	}
 
 	private enum Unit {
 		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero;
@@ -89,10 +162,10 @@ public class Translator {
 			return super.toString().toLowerCase();
 		}
 	}
-	
+
 	private enum Teens {
 		Eleven, Twelve, Thirteen, Fourteen, Fifteen, Sixteen, Seventeen, Eighteen, Nineteen;
-		
+
 		static Teens toTeens(int teen) {
 			switch (teen) {
 			case 11:
@@ -117,12 +190,12 @@ public class Translator {
 				throw new IllegalArgumentException("Number: " + teen + " is not a teen.");
 			}
 		}
-		
+
 		@Override
 		public String toString() {
 			return super.toString().toLowerCase();
 		}
-		
+
 		static boolean isTeen(long number) {
 			return number <= 19 && number >= 11;
 		}
@@ -144,21 +217,21 @@ public class Translator {
 		return (int) (number % DECIMAL);
 	}
 
-	private static String getUnits(long number) {
+	private static String getUnits(int number) {
 		Unit unit = Unit.toUnit(returnNthDigit(number, 0));
 		if (unit == Unit.Zero)
 			return "";
 		return unit.toString();
 	}
 
-	private static String getTens(long number) {
+	private static String getTens(int number) {
 		Tens tens = Tens.toTens(returnNthDigit(number, 1));
 		if (tens == Tens.Zero)
 			return "";
 		return tens.toString();
 	}
 
-	private static String getHundreds(long number) {
+	private static String getHundreds(int number) {
 		Unit hundreds = Unit.toUnit(returnNthDigit(number, 2));
 		if (hundreds == Unit.Zero)
 			return "";
@@ -167,14 +240,15 @@ public class Translator {
 		else
 			return hundreds.toString() + " hundreds";
 	}
-	
+
 	/**
 	 * The method translates the 3 rightmost digits of {@code number} into English.
-	 * @param number with >3 digits
-	 * @return a {@code StringBuilder} representing the translation of the the 3 rightmost
-	 * digits into English.
+	 * 
+	 * @param number with >=3 digits
+	 * @return a {@code StringBuilder} representing the translation of the the 3
+	 *         rightmost digits into English.
 	 */
-	private static StringBuilder translateOrderOfMagnitude(long number) {
+	private static StringBuilder translateOrderOfMagnitude(int number) {
 		StringBuilder translation = new StringBuilder();
 		translation.append(getHundreds(number));
 		if (Teens.isTeen(number % 100)) {
@@ -191,72 +265,135 @@ public class Translator {
 		translation.append(getUnits(number));
 		return translation;
 	}
-	
-	/** 
-	 * This is the main and most important method in the class. It is implemented by cutting {@code number} into
-	 * chunks of three decimal digits, each being translated individually into a {@code StringBuilder} of the form
-	 * {@code new StringBuilder(String.format("%d hundreds %d %d", hundreds, tens, units))} or alternatively of the form
-	 * {@code new StringBuilder(String.format("%d hundreds %d", hundreds, teens))} if appropriate.
-	 * The individual translations are then sequentially appended into {@code translation} with appropriates commas, spaces and
-	 * words. Finally, the method returns {@code translation.toString()}.
+
+	/**
+	 * This is the main and most important method in the class. It is implemented by
+	 * cutting {@code number} into chunks of three decimal digits, each being
+	 * translated individually into a {@code StringBuilder} of the form
+	 * {@code new StringBuilder(String.format("%d hundreds %d %d", hundreds, tens, units))}
+	 * or alternatively of the form
+	 * {@code new StringBuilder(String.format("%d hundreds %d", hundreds, teens))}
+	 * if appropriate. The individual translations are then sequentially appended
+	 * into {@code translation} with appropriates commas, spaces and words. Finally,
+	 * the method returns {@code translation.toString()}.
+	 * 
 	 * @param number to be translated
-	 * @return a string representing the number in English, or null if translation is unsuccessful.
+	 * @return a string representing the number in English, or null if translation
+	 *         is unsuccessful.
 	 */
-	public static String translate(long number) {
-		if (number > HIGHEST_NUMBER_TRANSLATABLE || number < LOWEST_NUMBER_TRANSLATEABLE)
-			return null; // translation failed
-		if (number == 0)
+	/*
+	 * public static String translate(String number) { if (number >
+	 * HIGHEST_NUMBER_TRANSLATABLE || number < LOWEST_NUMBER_TRANSLATEABLE) return
+	 * null; // translation failed if (number == 0) return "zero"; StringBuilder
+	 * translation = new StringBuilder(""); long trillions = number / (long) 1e12;
+	 * if (trillions % 1e3 != 0) {
+	 * translation.append(translateOrderOfMagnitude(trillions)); if (trillions != 1)
+	 * translation.append(" trillions"); else translation.append(" trillion"); }
+	 * 
+	 * long billions = number / (long) 1e9; if (billions % 1e3 != 0) { if (trillions
+	 * != 0) translation.append(", ");
+	 * translation.append(translateOrderOfMagnitude(billions)); if (billions != 1)
+	 * translation.append(" billions"); else translation.append(" billion"); }
+	 * 
+	 * long millions = number / (long) 1e6; if (millions % 1e3 != 0) { if (billions
+	 * != 0) translation.append(", ");
+	 * translation.append(translateOrderOfMagnitude(millions)); if (millions != 1)
+	 * translation.append(" millions"); else translation.append(" million"); }
+	 * 
+	 * long thousands = number / (long) 1e3; if (thousands % 1e3 != 0) { if
+	 * (millions != 0) translation.append(", ");
+	 * translation.append(translateOrderOfMagnitude(thousands)); if (thousands != 1)
+	 * translation.append(" thousands"); else translation.append(" thousand"); }
+	 * 
+	 * long units = number; if (units % 1e3 != 0) { if (thousands != 0)
+	 * translation.append(", ");
+	 * translation.append(translateOrderOfMagnitude(units)); }
+	 * 
+	 * return translation.toString(); }
+	 */
+
+	/**
+	 * Checks if the input is a number.
+	 * 
+	 * The methods returns true in three cases: a. The input is a string of digits
+	 * that doesn't begin with zero, with possible +/- before it. b. The input is a
+	 * string of numbers with commas according to the American standard. c. The
+	 * input is "-0", "+0" or "0".
+	 * 
+	 * @param input to be checked
+	 * @return true if input is a number
+	 */
+	public class NotTranslatableException extends Exception {
+		private static final long serialVersionUID = 7451609711063620553L;
+
+		public NotTranslatableException(String number) {
+			super(number + " isn't translateable due to this translator constraints.");
+		}
+
+		public TranslatorConstants getTranslatorConstants() {
+			return constants;
+		}
+
+	}
+
+	private static boolean isNumber(String input) {
+		return Pattern.matches("[+-]?([1-9][0-9]*|[1-9][0-9]{0,2}([,]{1}[0-9]{3})*|[0])", input);
+	}
+
+	private static boolean isZero(String number) {
+		return Pattern.matches("[+-]?[0]", number);
+	}
+
+	private static boolean isNegative(String number) {
+		return Pattern.matches("-.*", number);
+	}
+
+	private boolean isTranslateable(String rawNumber) {
+		return rawNumber.length() <= constants.getUpperBound();
+	}
+
+	public String translate(String number) throws NotTranslatableException {
+		if (!isNumber(number)) {
+			throw new IllegalArgumentException(number + " isn't a number.");
+		}
+
+		if (isZero(number)) {
 			return "zero";
-		StringBuilder translation = new StringBuilder("");
-		long trillions = number / (long) 1e12;
-		if (trillions % 1e3 != 0) {
-			translation.append(translateOrderOfMagnitude(trillions));
-			if (trillions != 1)
-				translation.append(" trillions");
-			else
-				translation.append(" trillion");
+		}
+
+		int sign = isNegative(number) ? -1 : 1;
+		String rawNumber = number.replaceAll("[-+,]", ""); // removes all the non digits from the String.
+
+		if (!isTranslateable(rawNumber)) {
+			throw new NotTranslatableException(number);
+		}
+
+		int length = rawNumber.length();
+
+		StringBuilder translation = new StringBuilder();
+
+		List<TranslatorConstants.OrderOfMagnitude> list = constants.getListOfConstants();
+		for (int i = list.size() - 1; i >= 0; i--) {
+			String orderOfMagnitude;
+				orderOfMagnitude = rawNumber.substring(Math.max(length - 3 * i - 3, 0), Math.max(length - 3 * i, 0));
+			if (orderOfMagnitude.isBlank())
+				continue;
+			int orderOfMagnitudeAsNumber = Integer.parseInt(orderOfMagnitude);
+			if (orderOfMagnitudeAsNumber != 0) {
+				if (!translation.isEmpty())
+					translation.append(", ");
+				translation.append(translateOrderOfMagnitude(orderOfMagnitudeAsNumber));
+				if (orderOfMagnitudeAsNumber == 1)
+					translation.append(list.get(i).getSingularName());
+				else
+					translation.append(list.get(i).getPluralName());
+			}
 		}
 		
-		long billions = number / (long) 1e9;
-		if (billions % 1e3 != 0) {
-			if (trillions != 0)
-				translation.append(", ");
-			translation.append(translateOrderOfMagnitude(billions));
-			if (billions != 1)
-				translation.append(" billions");
-			else
-				translation.append(" billion");
-		}
 		
-		long millions = number / (long) 1e6;
-		if (millions % 1e3 != 0) {
-			if (billions != 0)
-				translation.append(", ");
-			translation.append(translateOrderOfMagnitude(millions));
-			if (millions != 1)
-				translation.append(" millions");
-			else
-				translation.append(" million");
-		}
-		
-		long thousands = number / (long) 1e3;
-		if (thousands % 1e3 != 0) {
-			if (millions != 0)
-				translation.append(", ");
-			translation.append(translateOrderOfMagnitude(thousands));
-			if (thousands != 1)
-				translation.append(" thousands");
-			else
-				translation.append(" thousand");
-		}
-		
-		long units = number;
-		if (units % 1e3 != 0) {
-			if (thousands != 0)
-				translation.append(", ");
-			translation.append(translateOrderOfMagnitude(units));
-		}
-		
-		return translation.toString();
+		if (sign == -1)
+			return "minus " + translation.toString();
+		else
+			return translation.toString();
 	}
 }
