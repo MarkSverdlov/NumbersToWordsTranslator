@@ -1,40 +1,25 @@
 package translator;
 
+/**
+ * The class implements a static method {@code translate()} which gets as a parameter 
+ * of type {@code long} and if it's between {@code LOWEST_NUMBER_TRANSLATABLE} to {@code HIGHEST_NUMBER_TRANSLATABLE}
+ * the method outputs a String which names the number in English.
+ * 
+ * The class also implement all the helper methods, enums and other auxiliary code that supports the {@code translate()}
+ * method.
+ * 
+ * @author Mark
+ *
+ */
 public class Translator {
 	private static final int DECIMAL = 10;
+	
+	private static final long LOWEST_NUMBER_TRANSLATEABLE = 0L;
 
 	private static final long HIGHEST_NUMBER_TRANSLATABLE = (long) 1e15 - 1;
 
 	private enum Unit {
 		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Zero;
-
-		int toNumber() {
-			switch (this) {
-			case Eight:
-				return 8;
-			case Five:
-				return 5;
-			case Four:
-				return 4;
-			case Nine:
-				return 9;
-			case One:
-				return 1;
-			case Seven:
-				return 7;
-			case Six:
-				return 6;
-			case Three:
-				return 3;
-			case Two:
-				return 2;
-			case Zero:
-				return 0;
-			default:
-				return -1; // this shouldn't happen
-
-			}
-		}
 
 		static Unit toUnit(int unit) {
 			switch (unit) {
@@ -102,31 +87,6 @@ public class Translator {
 		@Override
 		public String toString() {
 			return super.toString().toLowerCase();
-		}
-	}
-
-	private enum OrderOfMagnitude {
-		Thousands, Millions, Billions, Trilions;
-
-		@Override
-		public String toString() {
-			return super.toString().toLowerCase();
-		}
-
-		public String toStringSingular() {
-			switch (this) {
-			case Billions:
-				return "billion";
-			case Millions:
-				return "million";
-			case Thousands:
-				return "thousand";
-			case Trilions:
-				return "trillion";
-			default:
-				return null;
-
-			}
 		}
 	}
 	
@@ -207,7 +167,13 @@ public class Translator {
 		else
 			return hundreds.toString() + " hundreds";
 	}
-
+	
+	/**
+	 * The method translates the 3 rightmost digits of {@code number} into English.
+	 * @param number with >3 digits
+	 * @return a {@code StringBuilder} representing the translation of the the 3 rightmost
+	 * digits into English.
+	 */
 	private static StringBuilder translateOrderOfMagnitude(long number) {
 		StringBuilder translation = new StringBuilder();
 		translation.append(getHundreds(number));
@@ -225,9 +191,19 @@ public class Translator {
 		translation.append(getUnits(number));
 		return translation;
 	}
-
+	
+	/** 
+	 * This is the main and most important method in the class. It is implemented by cutting {@code number} into
+	 * chunks of three decimal digits, each being translated individually into a {@code StringBuilder} of the form
+	 * {@code new StringBuilder(String.format("%d hundreds %d %d", hundreds, tens, units))} or alternatively of the form
+	 * {@code new StringBuilder(String.format("%d hundreds %d", hundreds, teens))} if appropriate.
+	 * The individual translations are then sequentially appended into {@code translation} with appropriates commas, spaces and
+	 * words. Finally, the method returns {@code translation.toString()}.
+	 * @param number to be translated
+	 * @return a string representing the number in English, or null if translation is unsuccessful.
+	 */
 	public static String translate(long number) {
-		if (number > HIGHEST_NUMBER_TRANSLATABLE)
+		if (number > HIGHEST_NUMBER_TRANSLATABLE || number < LOWEST_NUMBER_TRANSLATEABLE)
 			return null; // translation failed
 		if (number == 0)
 			return "zero";
@@ -238,7 +214,7 @@ public class Translator {
 			if (trillions != 1)
 				translation.append(" trillions");
 			else
-				translation.append(" trillions");
+				translation.append(" trillion");
 		}
 		
 		long billions = number / (long) 1e9;
